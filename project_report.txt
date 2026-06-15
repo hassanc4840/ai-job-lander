@@ -1,0 +1,123 @@
+================================================================================
+                         PROJECT REPORT: AI JOB FACTORY
+                     "Sequential Multi-Agent Application Suite"
+================================================================================
+
+This report documents the architectural design, core capabilities, and high-end 
+optimization enhancements built into the AI Job Factory web application.
+
+--------------------------------------------------------------------------------
+1. EXECUTIVE SUMMARY
+--------------------------------------------------------------------------------
+AI Job Factory is an advanced, production-grade Next.js web application designed 
+to optimize the job application process for candidates. By utilizing a parallel 
+multi-agent pipeline, the system extracts resume text, analyzes job descriptions, 
+computes compatibility metrics, rewrites resumes for ATS systems, drafts custom 
+cover letters and outreach materials, and builds personalized interview preparation 
+guides—all in under 30 seconds.
+
+--------------------------------------------------------------------------------
+2. SYSTEM ARCHITECTURE & PIPELINE OPTIMIZATION
+--------------------------------------------------------------------------------
+To deliver a high-end application within free-tier API constraints, the system 
+implements several advanced architectural optimizations:
+
+* Client-Side PDF Parsing:
+  Uses 'pdfjs-dist' directly in the web browser to extract text from resumes. 
+  This offloads heavy processing from the server and avoids the need for 
+  server-side PDF processing engines.
+
+* Dual-Call Parallelization:
+  Instead of launching 7 separate sequential LLM requests (which would take 
+  minutes and hit rate limits), the pipeline is consolidated into exactly 
+  TWO parallel asynchronous requests:
+  - Call 1 (Analysis): Returns a structured JSON payload containing the match 
+    score, skills gap lists, radar chart data, salary estimates, mock interview 
+    questions, and missing skill pivot strategies.
+  - Call 2 (Writing & Strategy): Returns a single long-form text output containing 
+    the rewritten resume, cover letter, follow-up email, cold outreach message, 
+    recruiter-facing gap explainer, and candidate coaching notes, parsed using 
+    custom delimiter boundaries.
+
+--------------------------------------------------------------------------------
+3. CORE PIPELINE AGENTS
+--------------------------------------------------------------------------------
+The application coordinates a suite of specialized agents working in tandem:
+
+1. Gap Analyst & Score Engine: Matches candidate resumes against job descriptions, 
+   identifies technical/soft skill overlaps, and scores candidate compatibility 
+   out of 100%.
+2. Skill Radar Engine: Calculates 6-dimensional metrics (Technical, Experience, 
+   Leadership, Communication, Cultural Fit, Education) to render interactive 
+   radar charts.
+3. ATS Resume Rewriter: Injects job-relevant keywords into resume experience 
+   bullets, utilizing action verbs and result-driven metrics while strictly 
+   adhering to resume truthfulness.
+4. Email & Outreach Drafter: Produces follow-up templates and LinkedIn InMail 
+   messages customized to the specific job and recruiter context.
+5. Interview Coach: Generates 7 custom interview questions and mock answer 
+   strategies mapped specifically to how the user's past experience fits.
+
+--------------------------------------------------------------------------------
+4. HIGH-END ADDITIONS & ENHANCEMENTS (RECENTLY COMPLETED)
+--------------------------------------------------------------------------------
+The following premium features and optimizations were implemented to make the 
+project exceptionally powerful and robust:
+
+* Employment Gap Explainer Agent:
+  Analyzes the resume timelines to detect employment gaps (> 3 months).
+  - Recruiter-Facing Insert: Generates a confident, non-defensive 3-5 sentence 
+    statement turning the gap into a strength (e.g. upskilling, personal projects).
+  - Private Coaching Strategy: Provides candidate-only tips on how recruiters flag 
+    the gap, STAR-format interview examples, and suggested bridging actions.
+  - UI Status Banner: Displays an amber alert banner on the dashboard if a gap is 
+    detected, or a green success checkmark if no gap exists.
+
+* Missing Skills Strategist:
+  Lacking skills (skills in the job description missing from the candidate's resume) 
+  are no longer just flagged. The agent generates a tailored 2-3 sentence interview 
+  pivot script for each lacking skill. Candidates can instantly click "Copy Script" 
+  to learn how to verbally pivot their transferrable experience when asked, 
+  "Do you have experience with X?"
+
+* Skill Gap Cover Letter Integration:
+  The Cover Letter Writer has been enhanced to automatically incorporate these 
+  missing skill pivot motivations directly in the body of the cover letter. Rather 
+  than ignoring gaps, it writes a motivating statement about how the candidate's 
+  transferrable background enables them to master these specific tools rapidly.
+
+* Multi-Provider Fallback Chain (Gemini → Groq → OpenAI):
+  To defeat rate limits (429 errors), the API layer is decoupled from any single LLM. 
+  When a user runs the pipeline, it automatically cascades through providers 
+  sequentially. If Gemini is rate-limited, it falls back to Groq, then OpenAI.
+
+* Multi-Key Auto-Rotation:
+  The system supports multiple comma-separated keys for any provider in the 
+  environment file (e.g. GEMINI_API_KEY=key1,key2). If Key 1 hits a rate limit, the 
+  system hot-swaps to Key 2 in real-time, completing requests without failing.
+
+* Groq Model-Rotation Engine:
+  To avoid Groq's low free-tier Tokens-Per-Minute (TPM) limit on 70B models, 
+  the Groq adapter rotates across multiple free models if a rate limit is hit:
+  - First: llama-3.3-70b-versatile (high quality)
+  - Second: mixtral-8x7b-32768 (30k TPM limit)
+  - Third: llama-3.1-8b-instant (fast fallback, 30k TPM limit)
+
+* ⚡ Use Demo Data Option:
+  Added a quick-test "⚡ Use Demo Data" button on the Apply screen. In one click, 
+  it pre-populates state with high-quality mock resume text and job descriptions, 
+  allowing developers, recruiters, or users to test the entire multi-agent 
+  pipeline instantly.
+
+--------------------------------------------------------------------------------
+5. TECHNICAL STACK SUMMARY
+--------------------------------------------------------------------------------
+* Frontend Framework: Next.js (App Router, TS, Tailwind CSS)
+* State Management: React Hooks & Persistent localStorage Integration
+* PDF Processing: Client-Side PDF.js (pdfjs-dist)
+* AI Providers: Google Gemini (2.5 Flash Lite), Groq Cloud (llama/mixtral), OpenAI (gpt-4o-mini)
+* Libraries: Lucide React, Framer Motion, Axios, Cheerio, JSPDF
+
+================================================================================
+                                END OF REPORT
+================================================================================

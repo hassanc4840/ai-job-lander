@@ -1,0 +1,133 @@
+================================================================================
+                       PROJECT PRESENTATION: AI JOB FACTORY
+                     "Land Your Dream Job. In 3 Minutes."
+================================================================================
+
+This document is structured slide-by-slide, including Slide Title, Key Bullet Points, 
+and Speaker Notes, so you can easily copy and paste it into PowerPoint, Google Slides,
+or Keynote.
+
+--------------------------------------------------------------------------------
+
+SLIDE 1: Title & Introduction
+--------------------------------------------------------------------------------
+[Slide Content]
+* Title: AI Job Factory
+* Subtitle: Elevating the Job Search with a Sequential Multi-Agent Pipeline
+* Hook: Transforming raw resumes into tailored, ATS-optimized application packages in under 3 minutes
+* Presenter Name: [Your Name]
+* Tech Stack: Next.js (App Router, Turbopack) & Gemini 2.5 Flash
+
+[Speaker Notes]
+"Good morning/afternoon everyone. Today, I'm excited to present 'AI Job Factory'—a modern web application designed to level the playing field for job seekers. Searching and applying for jobs has become an automated screening game, where applicant tracking systems filter out qualified people. AI Job Factory uses a sequence of five specialized AI agents to help applicants optimize their resumes, write targeted cover letters, and prepare for interviews—all in a single, streamlined process."
+
+
+--------------------------------------------------------------------------------
+
+SLIDE 2: The Problem
+--------------------------------------------------------------------------------
+[Slide Content]
+* The ATS Bottleneck: Up to 75% of resumes are filtered out by automated screeners before reaching a human recruiter.
+* Manual Personalization is Slow: Tailoring a resume and cover letter for 20+ roles takes hours of exhausting manual effort.
+* Preparation Gaps: Candidates go into interviews unprepared for how their specific experience maps to the job description.
+* Fragmentation: Job seekers use disconnected tools (one for PDF reading, one for writing, one for interview prep).
+
+[Speaker Notes]
+"The job search process today is broken. Job seekers face applicant tracking systems (ATS) that automatically screen resumes for specific keywords. Trying to manually customize a resume and write a unique cover letter for every single application is extremely time-consuming, taking hours per job. When candidates finally get an interview, they often struggle to articulate exactly how their specific background matches that company's unique needs. This creates a clear need for an integrated, automated helper."
+
+
+--------------------------------------------------------------------------------
+
+SLIDE 3: The Solution
+--------------------------------------------------------------------------------
+[Slide Content]
+* Automated end-to-end pipeline: One upload, one link, complete application package.
+* High-speed execution: Tailored results generated in ~30 seconds using Gemini API.
+* ATS optimization: Automatic keyword integration and gap analysis.
+* All-in-one preparation: Custom resume, cover letter, and a personalized interview prep coach in a single interface.
+
+[Speaker Notes]
+"AI Job Factory solves this. In just three minutes, a user uploads their resume PDF, inputs the job URL or description, and clicks 'Run All Agents'. The app takes over, extracting the text from the resume and scraping the job details. It then triggers our multi-agent pipeline to generate an optimized resume, a professional cover letter, a match score, and custom interview prep material."
+
+
+--------------------------------------------------------------------------------
+
+SLIDE 4: The 5-Agent Sequence
+--------------------------------------------------------------------------------
+[Slide Content]
+1. Gap Analyst:
+   - Evaluates resume text against job requirements.
+   - Extracts matching skills and flags missing ones.
+2. Score Engine:
+   - Calculates a compatibility score (0-100%) indicating alignment with the job.
+3. Resume Rewriter:
+   - Injects missing keywords and uses action verbs.
+   - Never invents experience—maintains 100% truthfulness.
+4. Cover Letter Writer:
+   - Drafts a professional, 3-paragraph letter using only real resume facts.
+5. Interview Coach:
+   - Creates 7 tailored interview questions and strategies mapped to the user's background.
+
+[Speaker Notes]
+"Let's look under the hood at the 5-Agent Sequence. 
+First, the Gap Analyst reads both inputs to map the skills. 
+Second, the Score Engine outputs a compatibility score. 
+Third, the Resume Rewriter rebuilds the resume bullets, boosting keywords and action verbs while keeping all facts honest. 
+Fourth, the Cover Letter Writer crafts a concise, human-sounding pitch. 
+Finally, the Interview Coach generates 7 highly targeted interview questions and answers, acting as a personal mentor."
+
+
+--------------------------------------------------------------------------------
+
+SLIDE 5: Technical Highlights & Optimization
+--------------------------------------------------------------------------------
+[Slide Content]
+* Client-Side PDF Parser: Uses 'pdfjs-dist' directly in the browser to extract plain text, keeping server endpoints lightweight and secure.
+* Dual-Call Parallelization: 
+  - Consolidates 5 agent steps into 2 structured API calls.
+  - Slashes API response times and halves token usage.
+  - Designed to fit comfortably within the Gemini API free tier limits.
+* Smart Job Scraper:
+  - Targets career pages directly via Cheerio parser.
+  - Proxies through Jina.ai Reader for client-heavy or protected sites.
+  - Recognizes auth-walls (like LinkedIn login prompts) and falls back to manual copy-paste.
+
+[Speaker Notes]
+"From a technical standpoint, we optimized for user experience and API efficiency. 
+Instead of sending a heavy PDF file to the server, we use pdf.js to extract text directly on the client. 
+To bypass rate limits and reduce latency, we don't call the LLM five separate times. Instead, we bundle the steps into two parallel requests—one for analysis (returning JSON) and one for writing (returning text separated by custom delimiters). 
+We also implemented a smart web scraper that automatically handles JavaScript-heavy sites and falls back gracefully when sites require login walls."
+
+
+--------------------------------------------------------------------------------
+
+SLIDE 6: Live Product Walkthrough
+--------------------------------------------------------------------------------
+[Slide Content]
+* Clean, Responsive UI: Dark-mode design system with smooth transitions and glassmorphism.
+* Drag-and-Drop Zone: Quick PDF uploading with visual verification.
+* Dual Input for Jobs: Enter a URL or paste job text directly.
+* Dashboard Pipeline Tracking: Real-time visual progress indicators for each agent.
+* Actionable Results View: Interactive tabs with copy/download options and practice modes.
+
+[Speaker Notes]
+"The user experience is clean and premium. Built with custom CSS and Framer Motion, it features a visual dropzone, instant scraping notifications, a live agent progress dashboard, and tabbed outputs. Users can review their compatibility, copy their new resume or cover letter, and start practicing mock interview questions immediately."
+
+
+--------------------------------------------------------------------------------
+
+SLIDE 7: Future Scope & Roadmap
+--------------------------------------------------------------------------------
+[Slide Content]
+* PDF Styling & Export: Direct export of optimized resumes in modern templates.
+* Interactive Voice Coach: Live mock interview practice using web audio API.
+* Job Tracker Dashboard: Kanban board to manage applications from target to interview.
+* Enterprise Integration: Recruiting portal integration for matching incoming candidates against open roles.
+
+[Speaker Notes]
+"Looking forward, we have several exciting enhancements planned. First is exporting resumes directly into styled, printer-ready PDF files. Second is an interactive voice coach, allowing users to practice answering the AI-generated questions out loud. We also plan to build a Kanban dashboard to help users track application statuses from start to finish."
+
+
+================================================================================
+                                END OF DOCUMENT
+================================================================================
