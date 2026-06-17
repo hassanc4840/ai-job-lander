@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import { callAI } from '@/lib/llm';
 
 export async function POST(req: Request) {
-  // Collect all configured provider keys from environment
   const env = {
     GEMINI_API_KEY: process.env.GEMINI_API_KEY,
     GROQ_API_KEY:   process.env.GROQ_API_KEY,
@@ -44,13 +43,13 @@ export async function POST(req: Request) {
     );
   }
 
-  const resume = resumeText.trim().slice(0, 4500);
-  const job = jobDescription.trim().slice(0, 3500);
+  // Optimize input tokens by slicing inputs to a tighter character window
+  const resume = resumeText.trim().slice(0, 3500);
+  const job = jobDescription.trim().slice(0, 2500);
 
   try {
-    // ── CALL 1: Analysis Agents ─────────────────────────────────────────────
-    // Match score + Skills gap + Radar chart + Salary estimation + Interview coach + Missing Skills strategist
-    // Returns structured JSON so any provider can handle it identically.
+    // ── CALL 1: Analysis Agents (Match score + Radar + Salary + Coach + Strategies)
+    // Reduce coach Q&A to exactly 4 items to optimize token limits
     const CALL_1_PROMPT = `You are a senior HR specialist, interview coach, and compensation analyst.
 
 Given the RESUME and JOB DESCRIPTION below, return a single valid JSON object with NO markdown, NO code fences, NO explanation — ONLY raw JSON:
@@ -84,14 +83,11 @@ Given the RESUME and JOB DESCRIPTION below, return a single valid JSON object wi
     {"q": "<interview question>", "a": "<specific answer strategy using candidate's actual resume experience>"},
     {"q": "...", "a": "..."},
     {"q": "...", "a": "..."},
-    {"q": "...", "a": "..."},
-    {"q": "...", "a": "..."},
-    {"q": "...", "a": "..."},
-    {"q": "..." , "a": "..."}
+    {"q": "...", "a": "..."}
   ]
 }
 
-Generate exactly 7 coach Q&A items. Base answer strategies ONLY on the candidate's actual resume.
+Generate exactly 4 coach Q&A items. Base answer strategies ONLY on the candidate's actual resume.
 For salary, use current market data for the job title, required skills, and seniority level.
 
 --- CANDIDATE RESUME ---
@@ -100,9 +96,8 @@ ${resume}
 --- JOB DESCRIPTION ---
 ${job}`;
 
-    // ── CALL 2: Writing Agents + Gap Explainer ─────────────────────────────
-    // 5 documents in one call, split by exact delimiter lines.
-    // Bundled to minimise API requests and stay within free-tier RPM limits.
+    // ── CALL 2: Writing Agents + Gap Explainer
+    // Streamline LinkedIn Outreach to a single text to optimize output token size
     const CALL_2_PROMPT = `You are a professional resume writer, cover letter specialist, career coach, and employment gap strategist.
 
 Using the candidate's RESUME and the JOB DESCRIPTION below, produce FIVE documents separated by these EXACT delimiter lines:
@@ -139,11 +134,9 @@ Rules:
 
 ===COLD_OUTREACH===
 
-DOCUMENT 4 (between ===COLD_OUTREACH=== and ===GAP_EXPLAINER===): A cold outreach message to a recruiter or hiring manager on LinkedIn.
+DOCUMENT 4 (between ===COLD_OUTREACH=== and ===GAP_EXPLAINER===): LinkedIn Recruiter Outreach message.
 Rules:
-- Short connection message format (under 280 characters for LinkedIn note)
-- Then a full InMail message (under 200 words)
-- Both separated by a blank line
+- Write a single concise LinkedIn message under 150 words. Focus on a clear value hook linking candidate experience to the target job requirements.
 
 ===GAP_EXPLAINER===
 
@@ -172,12 +165,10 @@ ${resume}
 --- JOB DESCRIPTION ---
 ${job}`;
 
-    // ── Run 2 parallel calls with automatic provider fallback ───────────────
-    // Each call independently tries Gemini → Groq → OpenAI until one works.
-    // Pass optimized maxTokens (1500 and 3000) to fit within free tier TPM limits.
+    // Pass optimized maxTokens (1200 and 2200) to fit within free tier TPM limits.
     const [call1Result, call2Result] = await Promise.all([
-      callAI(CALL_1_PROMPT, env, 1500),
-      callAI(CALL_2_PROMPT, env, 3000),
+      callAI(CALL_1_PROMPT, env, 1200),
+      callAI(CALL_2_PROMPT, env, 2200),
     ]);
 
     const analysisRaw = call1Result.text;
@@ -253,7 +244,6 @@ ${job}`;
         coachingNote: gapCoachingNote.trim(),
       },
       isLive: true,
-      // Show which providers were actually used for each call
       modelUsed: `${call1Result.provider}/${call1Result.model} + ${call2Result.provider}/${call2Result.model}`,
       providers: {
         analysis: { provider: call1Result.provider, model: call1Result.model },
