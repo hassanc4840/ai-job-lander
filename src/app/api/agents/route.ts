@@ -44,8 +44,8 @@ export async function POST(req: Request) {
   }
 
   // Optimize input tokens by slicing inputs to a tighter character window
-  const resume = resumeText.trim().slice(0, 3500);
-  const job = jobDescription.trim().slice(0, 2500);
+  const resume = resumeText.trim().slice(0, 2800);
+  const job = jobDescription.trim().slice(0, 2000);
 
   try {
     // ── CALL 1: Analysis Agents (Match score + Radar + Salary + Coach + Strategies)
@@ -97,78 +97,48 @@ ${resume}
 ${job}`;
 
     // ── CALL 2: Writing Agents + Gap Explainer
-    // Streamline LinkedIn Outreach to a single text to optimize output token size
-    const CALL_2_PROMPT = `You are a professional resume writer, cover letter specialist, career coach, and employment gap strategist.
+    const CALL_2_PROMPT = `You are a professional resume writer, cover letter specialist, and career coach.
 
-Using the candidate's RESUME and the JOB DESCRIPTION below, produce FIVE documents separated by these EXACT delimiter lines:
-===COVER_LETTER===
-===FOLLOW_UP_EMAIL===
-===COLD_OUTREACH===
-===GAP_EXPLAINER===
-===CANDIDATE_STRATEGY===
+Using the RESUME and JOB DESCRIPTION below, produce 5 documents separated by EXACT delimiters. Do NOT skip any delimiter.
 
-DOCUMENT 1 (before ===COVER_LETTER===): ATS-optimized resume.
-Rules:
-- Use ONLY facts from the original resume — never invent experience
-- Add keywords from the job description naturally
-- Improve bullets with action verbs and quantified results where possible
-- Sections: Professional Summary, Technical Skills, Work Experience, Education
+DOCUMENT 1 — ATS Resume (output BEFORE ===COVER_LETTER===):
+- Keep ALL facts from the original resume, never invent experience
+- Naturally add missing keywords from the job description into bullets
+- Strengthen bullets with action verbs and quantified results
+- Sections: Professional Summary | Technical Skills | Work Experience | Education
 
 ===COVER_LETTER===
-
-DOCUMENT 2 (between ===COVER_LETTER=== and ===FOLLOW_UP_EMAIL===): A 3-paragraph professional cover letter.
-Rules:
-- Base on the candidate's actual experience from their resume only
-- Be specific, human, confident — no clichés
-- Start with "Dear Hiring Manager,"
-- Identify any key skill gaps (technologies or skills in the job description that the candidate lacks). Proactively address this gap in the body of the cover letter by writing a highly motivating statement explaining how your existing transferrable experience enables you to master these missing skills rapidly.
-- Under 300 words
+DOCUMENT 2 — Cover Letter (3 paragraphs, under 280 words):
+- Start: "Dear Hiring Manager,"
+- Specific to candidate's real experience, no clichés
+- Address any skill gaps confidently with transferable skills
 
 ===FOLLOW_UP_EMAIL===
-
-DOCUMENT 3 (between ===FOLLOW_UP_EMAIL=== and ===COLD_OUTREACH===): A follow-up email sent 5 days after applying.
-Rules:
-- Subject line on first line (format: Subject: ...)
-- Polite, confident, under 150 words
-- Reference the specific role and company
+DOCUMENT 3 — Follow-up email (Subject line first, under 120 words, send 5 days after applying)
 
 ===COLD_OUTREACH===
-
-DOCUMENT 4 (between ===COLD_OUTREACH=== and ===GAP_EXPLAINER===): LinkedIn Recruiter Outreach message.
-Rules:
-- Write a single concise LinkedIn message under 150 words. Focus on a clear value hook linking candidate experience to the target job requirements.
+DOCUMENT 4 — LinkedIn message to recruiter (under 100 words, value-hook focused)
 
 ===GAP_EXPLAINER===
-
-DOCUMENT 5 — PART A (between ===GAP_EXPLAINER=== and ===CANDIDATE_STRATEGY===): Gap Explainer — recruiter-facing paragraph.
-- Carefully analyze the RESUME for any employment gaps (periods with no listed job, unexplained breaks, overlapping dates)
-- Write a confident, honest 3-5 sentence paragraph to insert into the cover letter
-- Acknowledge the gap briefly and without apology
-- Turn the gap into a strength: what was learned, built, or developed during that time
-- Directly connect it to the specific skills/traits this recruiter is looking for
-- Tone: professional, forward-looking, warm — NOT defensive
-- If NO significant gap detected (< 3 months): write only "No significant employment gap detected."
+DOCUMENT 5A — Employment gap recruiter paragraph:
+- If gap exists (>3 months): 3-5 confident sentences for cover letter. Turn gap into strength.
+- If NO gap: write exactly "No significant employment gap detected."
 
 ===CANDIDATE_STRATEGY===
+DOCUMENT 5B — Private coaching note (candidate eyes only):
+- If gap: dates, why recruiters flag it, 3 interview strategies
+- If no gap: 1 proactive tip
 
-DOCUMENT 5 — PART B (after ===CANDIDATE_STRATEGY===): Gap Explainer — private coaching note for the candidate only.
-- If a gap exists: list the specific dates/duration of the gap detected
-- Explain exactly WHY recruiters might flag this (their typical concern)
-- Give 3-4 specific strategies to address it in interviews (STAR-format examples if possible)
-- Suggest skills/certifications that would bridge the gap for THIS specific job
-- Tone: supportive coach, direct and practical
-- If no gap: confirm this and give 1 proactive tip
-
---- CANDIDATE RESUME ---
+--- RESUME ---
 ${resume}
 
 --- JOB DESCRIPTION ---
 ${job}`;
 
-    // Pass optimized maxTokens (1200 and 2200) to fit within free tier TPM limits.
+    // Call 1: 1200 tokens for JSON analysis. Call 2: 3500 tokens for full document set.
     const [call1Result, call2Result] = await Promise.all([
       callAI(CALL_1_PROMPT, env, 1200),
-      callAI(CALL_2_PROMPT, env, 2200),
+      callAI(CALL_2_PROMPT, env, 3500),
     ]);
 
     const analysisRaw = call1Result.text;
