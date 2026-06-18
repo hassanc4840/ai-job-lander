@@ -25,7 +25,7 @@ export interface LLMResult {
 
 // ── Provider: Gemini ──────────────────────────────────────────────────────────
 async function callGemini(apiKey: string, prompt: string, maxTokens?: number): Promise<{ text: string; model: string }> {
-  const model = 'gemini-2.5-flash-lite';
+  const model = 'gemini-2.0-flash';
   const res = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
     {
@@ -61,7 +61,8 @@ async function callGemini(apiKey: string, prompt: string, maxTokens?: number): P
 async function callGroq(apiKey: string, prompt: string, maxTokens?: number): Promise<{ text: string; model: string }> {
   const models = [
     'llama-3.3-70b-versatile', // Best quality free model
-    'mixtral-8x7b-32768',      // Excellent fallback
+    'llama-3.1-70b-versatile', // High quality alternative
+    'gemma2-9b-it',            // Google Gemma - generous limits
     'llama-3.1-8b-instant',    // Extremely high rate limits, fast fallback
   ];
 
